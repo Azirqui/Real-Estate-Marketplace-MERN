@@ -1,0 +1,25 @@
+{
+  "name": "real-estate-marketplace-mern",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon api/index.js",
+    "start": "node api/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azirqui/Real-Estate-Marketplace-MERN.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Azirqui/Real-Estate-Marketplace-MERN/issues"
+  },
+  "homepage": "https://github.com/Azirqui/Real-Estate-Marketplace-MERN#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
