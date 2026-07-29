@@ -1,25 +1,37 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-const [formData, setFormData] = useState({});
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(false);
-
-const navigate = useNavigate();
 
 export default function SignUp() {
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    const res = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
-    const data = await res.json();
-    if (data.success === false) {
-      setError(data.message);
+    try {
+      setLoading(true);
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        setLoading(false);
+        setError(data.message);
+        return;
+      }
+      setLoading(false);
+      setError(null);
+      navigate('/sign-in');
+    } catch (err) {
+      setLoading(false);
+      setError(err.message);
     }
-    setLoading(false);
-    navigate('/sign-in');
   }
   return (
     <div className='p-3 max-w-lg mx-auto'>
