@@ -28,17 +28,12 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [userUpdateSuccess, setUserUpdateSuccess] = useState(false);
 
-  // Trigger upload automatically when a new file is picked
-  useEffect(() => {
-    if (file) {
-      handleFileUpload(file);
-    }
-  }, [file]);
-
   // Cloudinary Upload Handler
-  const handleFileUpload = async (file) => {
-    // 1. Client-side size validation (2 MB limit)
-    if (file.size > 2 * 1024 * 1024) {
+  const handleFileUpload = async (fileToUpload) => {
+    if (!fileToUpload) return;
+
+    // Client-side size validation (2 MB limit)
+    if (fileToUpload.size > 2 * 1024 * 1024) {
       setFileUploadError('Image must be less than 2 MB');
       return;
     }
@@ -51,7 +46,7 @@ export default function Profile() {
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
     const data = new FormData();
-    data.append('file', file);
+    data.append('file', fileToUpload);
     data.append('upload_preset', uploadPreset);
 
     try {
@@ -66,11 +61,28 @@ export default function Profile() {
       const cloudinaryData = await res.json();
 
       if (cloudinaryData.secure_url) {
-        // Save avatar URL into form state ready for update form submission
-        setFormData((prev) => ({ ...prev, avatar: cloudinaryData.secure_url }));
+        const newAvatarUrl = cloudinaryData.secure_url;
+        setFormData((prev) => ({ ...prev, avatar: newAvatarUrl }));
         setFileUploadSuccess(true);
+
+        // Automatically save updated avatar to backend & redux store
+        dispatch(updateStart());
+        const updateRes = await fetch(`/api/user/update/${currentUser._id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ avatar: newAvatarUrl }),
+        });
+        const updateData = await updateRes.json();
+        if (updateData.success === false) {
+          dispatch(updateFailure(updateData.message));
+          return;
+        }
+        dispatch(updateSuccess(updateData));
+        setUserUpdateSuccess(true);
       } else {
-        setFileUploadError('Error uploading image to Cloudinary');
+        setFileUploadError(cloudinaryData.error?.message || 'Error uploading image to Cloudinary');
       }
     } catch (err) {
       setFileUploadError('Cloudinary connection error');
@@ -148,7 +160,13 @@ export default function Profile() {
       <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
         {/* Hidden File Input */}
         <input
-          onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => {
+            const selectedFile = e.target.files[0];
+            if (selectedFile) {
+              setFile(selectedFile);
+              handleFileUpload(selectedFile);
+            }
+          }}
           type='file'
           ref={fileRef}
           hidden
@@ -170,7 +188,7 @@ export default function Profile() {
           ) : uploading ? (
             <span className='text-slate-700'>Uploading image to Cloudinary...</span>
           ) : fileUploadSuccess ? (
-            <span className='text-green-700'>Image successfully uploaded! Click "Update" to save.</span>
+            <span className='text-green-700'>Image uploaded & saved successfully!</span>
           ) : (
             ''
           )}

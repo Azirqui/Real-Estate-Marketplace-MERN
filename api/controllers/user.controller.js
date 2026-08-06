@@ -1,5 +1,5 @@
 import User from "../models/user.model.js"
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export const test = (req, res) => {
     res.json({
@@ -14,14 +14,19 @@ export const updateUser = async (req, res, next) => {
             if (req.body.password) {
                 req.body.password = bcrypt.hashSync(req.body.password, 10);
             }
-            const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-                $set: {
-                    username: req.body.username,
-                    email: req.body.email,
-                    password: req.body.password,
-                }
-            }, { new: true });
-            const { password, ...rest } = updatedUser;
+            const updatedUser = await User.findByIdAndUpdate(
+                req.params.id,
+                {
+                    $set: {
+                        ...(req.body.username && { username: req.body.username }),
+                        ...(req.body.email && { email: req.body.email }),
+                        ...(req.body.password && { password: req.body.password }),
+                        ...(req.body.avatar && { avatar: req.body.avatar }),
+                    },
+                },
+                { new: true }
+            );
+            const { password, ...rest } = updatedUser._doc;
             res.status(200).json(rest);
 
         } catch (err) {
