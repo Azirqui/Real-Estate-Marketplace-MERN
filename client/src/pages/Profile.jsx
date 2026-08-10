@@ -23,7 +23,7 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [fileUploadSuccess, setFileUploadSuccess] = useState(false);
- const [showListingsError, setShowListingsError] = useState(false);
+  const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
 
   // Form Data & Status States
@@ -156,7 +156,7 @@ export default function Profile() {
     }
   };
 
- const handleShowListings = async () => {
+  const handleShowListings = async () => {
     try {
       setShowListingsError(false);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
@@ -288,7 +288,7 @@ export default function Profile() {
       <p className='text-green-700 mt-5'>
         {userUpdateSuccess ? 'User updated successfully!' : ''}
       </p>
-       <button onClick={handleShowListings} className='text-green-700 w-full'>
+      <button onClick={handleShowListings} className='text-green-700 w-full'>
         Show Listings
       </button>
       <p className='text-red-700 mt-5'>
@@ -317,15 +317,17 @@ export default function Profile() {
               >
                 <p>{listing.name}</p>
               </Link>
-  
+
               <div className='flex flex-col item-center'>
-                 <button
+                <button
                   onClick={() => handleListingDelete(listing._id)}
                   className='text-red-700 uppercase'
                 >
                   Delete
                 </button>
-                <button className='text-green-700 uppercase'>Edit</button>
+                <Link to={`/update-listing/${listing._id}`}>
+                  <button className='text-green-700 uppercase'>Edit</button>
+                </Link>
               </div>
             </div>
           ))}
