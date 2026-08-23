@@ -8,7 +8,6 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
-    require("@tailwindcss/line-clamp"),
   ],
   server: {
     proxy: {
